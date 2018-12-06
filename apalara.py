@@ -58,32 +58,36 @@ class Apalara:
 		self.robot_arm = [_index_0 - 1, _index_1]
 		arm = self.robot_arm
 		position_for_print = self.position[arm[0]][arm[1]]
-		print('Robot arm at ' + str(position_for_print))
+
+	# print('Robot arm at ' + str(position_for_print))
 
 	def arm_grasp(self):
 		arm_0 = self.robot_arm[0] + 1
 		arm_1 = self.robot_arm[1]
 		self.robot_arm = [[arm_0], [arm_1]]
-		print('Object grasped')
 
 	def arm_free(self):
 		arm = self.robot_arm
 		arm_0 = arm[0] - 1
 		arm_1 = arm[1]
 		self.robot_arm = [arm_0, arm_1]
-		print('Arm:' + str(self.robot_arm))
+
+	# print('Arm:' + str(self.robot_arm))
 
 	def arm_place_on_table(self, x):
 		# The object must be grasped
 		position = self.position
-		for i in position[5]:
-			if i in self.box_names:
+		for index, i in enumerate(position[5], start=0):
+			if str(i) in self.box_names:
 				continue
 			else:
-				self.move_arm_to(position[5][i])
-				self.robot_arm = [5, i]
-				self.arm_free()
-				print(self.position)
+				x_ = get_box(self, x)
+				# get the index
+				self.robot_arm = [5, index]  # update robot arm
+				self.move(x_, self.robot_arm)
+				self.update_position(x_, self.robot_arm)
+				# self.arm_free()
+				# print(self.position)
 				print('Box placed on table')
 
 	def nop(self):
@@ -196,6 +200,7 @@ class Apalara:
 	"""
 	Box move controls
 	"""
+
 	def update_position(self, old, new):
 		old_index_0 = old[0]
 		old_index_1 = old[1]
@@ -203,6 +208,29 @@ class Apalara:
 		new_index_1 = new[1]
 		self.position[new_index_0][new_index_1] = self.position[old_index_0][old_index_1]
 		self.position[old_index_0][old_index_1] = 0
+
+	def swap_position_and_update(self, old, new):
+		old_index_0, old_index_1 = old[0], old[1]
+		new_index_0, new_index_1 = new[0], new[1]
+		box_position_old = self.position[old_index_0][old_index_1]
+		box_position_new = self.position[new_index_0][new_index_1]
+		self.position[new_index_0][new_index_1] = box_position_old
+		self.position[old_index_0][old_index_1] = box_position_new
+
+	def update_box(self, x, value):
+		x_ = x.upper()
+		if x_ == 'A':
+			self.A = value
+		elif x_ == 'B':
+			self.B = value
+		elif x_ == 'C':
+			self.C = value
+		elif x_ == 'D':
+			self.D = value
+		elif x_ == 'E':
+			self.E = value
+		elif x_ == 'F':
+			self.F = value
 
 	# To move from source to destination
 	def move(self, box, destination):
@@ -214,13 +242,23 @@ class Apalara:
 
 	def put_box_on(self, x, y):
 		# Put x on top of y
-		x = get_box(self, x)
-		y = get_box(self, y)
-		y = [y[0] - 1, y[1]]
-		self.move(x, y)
+		_x = get_box(self, x)
+		_y = get_box(self, y)
+		_y = [_y[0] - 1, _y[1]]
+		self.move(_x, _y)
+		self.update_box(x, _y)
+
+	def swap_boxes(self, x, y):
+		x_ = get_box(self, x)
+		y_ = get_box(self, y)
+		self.swap_position_and_update(x_, y_)
 
 
 obj = Apalara()
 
-obj.put_box_on('e', 'c')
+# obj.put_box_on('e', 'c')
+# obj.put_box_on('a', 'f')
+# obj.put_box_on('b', 'a')
+# obj.arm_place_on_table('e')
+# obj.swap_boxes('B', 'C')
 print(obj)
