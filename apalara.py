@@ -56,10 +56,6 @@ class Apalara:
 		_index_0 = box[0]
 		_index_1 = box[1]
 		self.robot_arm = [_index_0 - 1, _index_1]
-		arm = self.robot_arm
-		position_for_print = self.position[arm[0]][arm[1]]
-
-	# print('Robot arm at ' + str(position_for_print))
 
 	def arm_grasp(self):
 		arm_0 = self.robot_arm[0] + 1
@@ -72,22 +68,16 @@ class Apalara:
 		arm_1 = arm[1]
 		self.robot_arm = [arm_0, arm_1]
 
-	# print('Arm:' + str(self.robot_arm))
-
 	def arm_place_on_table(self, x):
-		# The object must be grasped
 		position = self.position
 		for index, i in enumerate(position[5], start=0):
 			if str(i) in self.box_names:
 				continue
 			else:
 				x_ = self.get_box(x)
-				# get the index
-				self.robot_arm = [5, index]  # update robot arm
+				self.robot_arm = [5, index]
 				self.move(x_, self.robot_arm)
 				self.update_position(x_, self.robot_arm)
-				# self.arm_free()
-				# print(self.position)
 				print('Box placed on table')
 
 	def nop(self):
@@ -316,15 +306,173 @@ class Apalara:
 
 		return output
 
-# obj = Apalara()
-#
-# obj.put_box_on('e', 'c')
-# print(obj.can_arm_grasp('f'))
-# obj.put_box_on('a', 'f')
-# obj.put_box_on('b', 'a')
-# print(obj.is_box_in_middle('b'))
-# print(obj.is_box_on_table('f'))
-# print(obj.get_box_position('d'))
-# obj.arm_place_on_table('e')
-# obj.swap_boxes('B', 'C')
-# print(obj)
+
+"""
+===========================================================================================
+"""
+
+
+def get_command():
+	instruction = input('Enter command or query below:\n').lower()
+	return instruction
+
+
+def handle_action_interactions(self, command):
+	if 'swap boxes' in command:
+		if len(command) != 18:
+			print('Invalid command')
+
+		box_1 = command[-7]
+		box_2 = command[-1]
+		self.swap_boxes(box_1, box_2)
+		print(self)
+
+	elif 'place box' in command and 'on the table' not in command and 'under box' not in command:
+		if len(command) != 20:
+			print('Invalid command')
+
+		box_top_name = command[10]
+		box_under_name = command[-1]
+		self.put_box_on(box_top_name, box_under_name)
+		print(self)
+
+	elif 'place box' in command and 'under box' in command:
+		if len(command) != 23:
+			print('Invalid command')
+
+		box_under_name = command[10]
+		box_top_name = command[-1].upper()
+		box_top = self.get_box(box_top_name)
+
+		if self.is_box_under_another(box_top_name):
+			other_box = self.position[box_top[0] - 1][box_top[1]]
+			responses = {
+				"resp": "This is not possible \n",
+				"why": "Because box " + str(box_top_name) + " is under box " + str(other_box) + "\n",
+				"and_then": "I cannot remove a box under another box \n",
+				"why_again": "The stacked boxes will fall \n"
+			}
+			resp = input(responses['resp'])
+
+			if 'why' in resp.lower():
+				resp = input(responses['why'])
+				if "and then" in resp.lower():
+					resp = input(responses['and_then'])
+					if "why" in resp.lower():
+						print(responses['why_again'])
+
+		else:
+			self.put_box_on(box_top_name, box_under_name)
+			print(self)
+
+	elif 'place box' in command and 'on the table' in command:
+		if len(command) != 24:
+			print('Invalid command')
+
+		box_for_table = command[10]
+		self.arm_place_on_table(box_for_table)
+		print(self)
+
+	elif 'generate the' in command:
+		print('Ode bi')
+		if 'three' in command:
+			self.put_box_on('B', 'A')
+			self.put_box_on('C', 'B')
+			self.put_box_on('E', 'D')
+			self.put_box_on('F', 'E')
+			print(self)
+
+		if 'six' in command:
+			self.put_box_on('B', 'A')
+			self.put_box_on('C', 'B')
+			self.put_box_on('D', 'C')
+			self.put_box_on('E', 'D')
+			self.put_box_on('F', 'E')
+			print(self)
+
+	elif 'stack' in command:
+		if len(command) != 48:
+			print('Invalid command')
+
+		base_box = command[-1]
+		first_box = command[6]
+		second_box = command[9]
+		third_box = command[12]
+		fourth_box = command[19]
+
+		self.put_box_on(fourth_box, base_box)
+		self.put_box_on(third_box, fourth_box)
+		self.put_box_on(second_box, third_box)
+		self.put_box_on(first_box, second_box)
+		print(self)
+
+	elif 'grasp' in command:
+		box_name = command[-2]
+		box = self.get_box(box_name)
+		if self.is_box_under_another(box_name):
+			other_box = self.position[box[0] - 1][box[1]]
+			responses = {
+				"resp": "This is not possible \n",
+				"why": "Because box " + str(box_name) + " is under box " + str(other_box) + "\n",
+				"and_then": "I cannot remove a box under another box \n",
+				"why_again": "The stacked boxes will fall \n"
+			}
+			resp = input(responses['resp'])
+			if resp.lower() == 'why':
+				resp = input(responses['why'])
+				if "and then" in resp.lower():
+					resp = input(responses['and_then'])
+					if "why" in resp.lower():
+						print(responses['why_again'])
+
+		else:
+			self.move_arm_to(box)
+			self.arm_grasp()
+			print('Grasped')
+
+	elif 'where is' in command:
+		if command[-1] == '?':
+			box_name = command[-2]
+		else:
+			box_name = command[-1]
+		location = self.get_box_position(box_name)
+		print(location)
+
+	elif 'is box' in command and 'on the table' in command:
+		box_name = command[7]
+		if self.is_box_on_table(box_name):
+			print('Yes, box ' + str(box_name) + ' is on the table')
+		else:
+			print(self.get_box_position(box_name))
+
+	elif 'what boxes are' in command and 'neighbour' in command:
+		if command[-1] == '?':
+			box_name = command[-2]
+		else:
+			box_name = command[-1]
+		print(self.get_neighbours(box_name))
+
+	else:
+		print('Invalid input')
+		exit()
+
+
+def run_apalara(self):
+	command = get_command()
+	if command.lower() == 'exit':
+		return exit()
+
+	handle_action_interactions(self, command)
+	run_apalara(self)
+
+
+print('*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*')
+print('Welcome to Apalara!')
+print('*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*')
+
+print('Below is the default robot world')
+apalara = Apalara()
+print(apalara)
+print('--------------------------------\n')
+print('Kindly enter "exit" to exit your session')
+run_apalara(apalara)
