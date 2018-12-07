@@ -418,7 +418,7 @@ def handle_action_interactions(self, command):
 				"why_again": "The stacked boxes will fall \n"
 			}
 			resp = input(responses['resp'])
-			if resp.lower() == 'why':
+			if 'why' in resp.lower():
 				resp = input(responses['why'])
 				if "and then" in resp.lower():
 					resp = input(responses['and_then'])
