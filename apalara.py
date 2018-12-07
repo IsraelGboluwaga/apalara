@@ -374,7 +374,6 @@ def handle_action_interactions(self, command):
 		print(self)
 
 	elif 'generate the' in command:
-		print('Ode bi')
 		if 'three' in command:
 			self.put_box_on('B', 'A')
 			self.put_box_on('C', 'B')
