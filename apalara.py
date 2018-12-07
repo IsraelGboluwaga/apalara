@@ -3,25 +3,6 @@ class Constants:
 	INVALID_PARAM = 'Invalid parameter'
 
 
-def get_box(self, letter):
-	box = None
-	letter = letter.upper()
-	if letter == 'A':
-		box = self.A
-	elif letter == 'B':
-		box = self.B
-	elif letter == 'C':
-		box = self.C
-	elif letter == 'D':
-		box = self.D
-	elif letter == 'E':
-		box = self.E
-	elif letter == 'F':
-		box = self.F
-
-	return box
-
-
 class Apalara:
 	def __init__(self):
 		self.position = [
@@ -32,6 +13,7 @@ class Apalara:
 			[0, 0, 0, 0, 0, 0],
 			['A', 'B', 'C', 'D', 'E', 'F']
 		]
+
 		self.A = [5, 0]
 		self.B = [5, 1]
 		self.C = [5, 2]
@@ -45,6 +27,24 @@ class Apalara:
 		output = '\n'.join(' '.join(map(str, i)) for i in self.position)
 		return output
 
+	def get_box(self, letter):
+		box = None
+		letter = letter.upper()
+		if letter == 'A':
+			box = self.A
+		elif letter == 'B':
+			box = self.B
+		elif letter == 'C':
+			box = self.C
+		elif letter == 'D':
+			box = self.D
+		elif letter == 'E':
+			box = self.E
+		elif letter == 'F':
+			box = self.F
+
+		return box
+
 	"""
 	Action proposition over the robot world
 	"""
@@ -52,7 +52,7 @@ class Apalara:
 	def move_arm_to(self, x):
 		box = x
 		if type(x) != list:
-			box = get_box(self, x)
+			box = self.get_box(x)
 		_index_0 = box[0]
 		_index_1 = box[1]
 		self.robot_arm = [_index_0 - 1, _index_1]
@@ -81,7 +81,7 @@ class Apalara:
 			if str(i) in self.box_names:
 				continue
 			else:
-				x_ = get_box(self, x)
+				x_ = self.get_box(x)
 				# get the index
 				self.robot_arm = [5, index]  # update robot arm
 				self.move(x_, self.robot_arm)
@@ -103,10 +103,8 @@ class Apalara:
 		if (x or y) not in self.box_names:
 			return Constants.INVALID_BOX_NAME
 
-		box_x = get_box(self, x)
-		box_y = get_box(self, y)
-		print('box_x:' + str(box_x))
-		print('box_y:' + str(box_y))
+		box_x = self.get_box(x)
+		box_y = self.get_box(y)
 
 		if (box_x[0] != box_y[0]) and abs(box_x[0] - box_y[0]) == 1 and (box_x[1] == box_y[1]):
 			return True
@@ -118,7 +116,7 @@ class Apalara:
 		if x not in self.box_names:
 			return Constants.INVALID_BOX_NAME
 
-		box = get_box(self, x)
+		box = self.get_box(x)
 		truth = True
 		print(box)
 		for _box in self.box_names:
@@ -135,7 +133,7 @@ class Apalara:
 		if x not in self.box_names:
 			return Constants.INVALID_BOX_NAME
 
-		box = get_box(self, x)
+		box = self.get_box(x)
 		if box[0] != 5:
 			return False
 
@@ -147,8 +145,8 @@ class Apalara:
 		if (x or y) not in self.box_names:
 			return Constants.INVALID_BOX_NAME
 
-		box_x = get_box(self, x)
-		box_y = get_box(self, y)
+		box_x = self.get_box(x)
+		box_y = self.get_box(y)
 
 		if (box_x[0] == box_y[0]) and (box_y[1] - box_x[1] == 1):
 			return True
@@ -161,8 +159,8 @@ class Apalara:
 		if (x or y) not in self.box_names:
 			return Constants.INVALID_BOX_NAME
 
-		box_x = get_box(self, x)
-		box_y = get_box(self, y)
+		box_x = self.get_box(x)
+		box_y = self.get_box(y)
 
 		if (box_x[0] == box_y[0]) and (box_x[1] - box_y[1] == 1):
 			return True
@@ -175,8 +173,8 @@ class Apalara:
 		if (x or y) not in self.box_names:
 			return Constants.INVALID_BOX_NAME
 
-		box_x = get_box(self, x)
-		box_y = get_box(self, y)
+		box_x = self.get_box(x)
+		box_y = self.get_box(y)
 		if (box_x[0] != box_y[0]) and (box_x[0] - box_y[0] == 1) and (box_x[1] == box_y[1]):
 			return True
 		return False
@@ -186,14 +184,14 @@ class Apalara:
 			return Constants.INVALID_PARAM
 
 		for _box in self.box_names:
-			if get_box(self, _box) == pos:
+			if self.get_box(_box) == pos:
 				return True
 
 		return False
 
 	def grasping(self, x):
 		# Do shit here
-		if self.robot_arm == get_box(self, x):
+		if self.robot_arm == self.get_box(x):
 			return True
 		return False
 
@@ -208,6 +206,8 @@ class Apalara:
 		new_index_1 = new[1]
 		self.position[new_index_0][new_index_1] = self.position[old_index_0][old_index_1]
 		self.position[old_index_0][old_index_1] = 0
+		# new_position_name = self.position[new[0]][new[1]]
+		# self.update_box(new_position_name, [old_index_0, old_index_1])
 
 	def swap_position_and_update(self, old, new):
 		old_index_0, old_index_1 = old[0], old[1]
@@ -216,6 +216,10 @@ class Apalara:
 		box_position_new = self.position[new_index_0][new_index_1]
 		self.position[new_index_0][new_index_1] = box_position_old
 		self.position[old_index_0][old_index_1] = box_position_new
+		# new_position_name = self.position[new[0]][new[1]]
+		# old_position_name = self.position[old[0]][old[1]]
+		# self.update_box(old_position_name, [new_index_0, new_index_1])
+		# self.update_box(new_position_name, [old_index_0, old_index_1])
 
 	def update_box(self, x, value):
 		x_ = x.upper()
@@ -242,23 +246,85 @@ class Apalara:
 
 	def put_box_on(self, x, y):
 		# Put x on top of y
-		_x = get_box(self, x)
-		_y = get_box(self, y)
+		_x = self.get_box(x)
+		_y = self.get_box(y)
 		_y = [_y[0] - 1, _y[1]]
 		self.move(_x, _y)
 		self.update_box(x, _y)
 
 	def swap_boxes(self, x, y):
-		x_ = get_box(self, x)
-		y_ = get_box(self, y)
+		x_ = self.get_box(x)
+		y_ = self.get_box(y)
 		self.swap_position_and_update(x_, y_)
 
+	"""
+	Other
+	"""
 
-obj = Apalara()
+	def can_arm_grasp(self, x):
+		box = self.get_box(x)
+		if self.position[box[0] - 1][box[1]] == 0:
+			return True
+		return False
 
+	def is_box_in_middle(self, x):
+		box = self.get_box(x)
+		if box[0] == 5:
+			return False
+		elif self.position[box[0] - 1][box[1]] != 0 and self.position[box[0] + 1][box[1]] != 0:
+			return True
+		return False
+
+	def is_box_under_another(self, x):
+		box = self.get_box(x)
+		if self.position[box[0] - 1][box[1]] != 0:
+			return True
+		return False
+
+	def is_box_on_table(self, x):
+		box = self.get_box(x)
+		if box[0] == 5:
+			return True
+		return False
+
+	def get_box_position(self, x):
+		x = x.upper()
+		box = self.get_box(x)
+		if box[0] == 5:
+			return str(x) + " is on the table"
+		else:
+			box_under = [box[0] + 1, box[1]]
+			for i in self.box_names:
+				if self.get_box(i) == box_under:
+					return "Box " + str(x) + " is on top of box " + str(i)
+
+	def get_neighbours(self, x):
+		x = x.upper()
+		box = self.get_box(x)
+		neighbours = []
+		for each_box in self.box_names:
+			each__box = self.get_box(each_box)
+			if each__box[0] == box[0] and (abs(each__box[1] - box[1]) == 1):
+				neighbours.append(each_box)
+
+		if len(neighbours) == 1:
+			output = "The neighbour of " + str(x) + " is " + neighbours[0]
+		elif len(neighbours) == 2:
+			output = "The neighbours of " + str(x) + " are " + neighbours[0] + " and " + neighbours[1]
+		else:
+			output = str(x) + " has no neighbours"
+
+		return output
+
+# obj = Apalara()
+#
 # obj.put_box_on('e', 'c')
+# print(obj.can_arm_grasp('f'))
 # obj.put_box_on('a', 'f')
 # obj.put_box_on('b', 'a')
+# print(obj.is_box_in_middle('b'))
+# print(obj.is_box_on_table('f'))
+# print(obj.get_box_position('d'))
 # obj.arm_place_on_table('e')
 # obj.swap_boxes('B', 'C')
-print(obj)
+# print(obj)
